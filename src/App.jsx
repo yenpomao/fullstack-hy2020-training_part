@@ -1,27 +1,48 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import Note from './components/Note'
+import axios from 'axios'
+import noteService from './services/notes'
 import './App.css'
 
 
-const App = (props) => {
-  const [notes, setNotes] = useState(props.notes)
-  const [newNote, setNewNote] = useState(
-    'a new note...'
-  )
+const App = () => {
+  const [notes, setNotes] = useState([])
+  const [newNote, setNewNote] = useState("")
   const [showAll, setShowAll] = useState(true)
+  const toggleImportanceOf = id => {
+    const url = `http://localhost:3001/notes/${id}`
+    const note = notes.find(n => n.id === id)
+    const changedNote = { ...note, important: !note.important }
+  
+    axios.put(url, changedNote).then(response => {
+      setNotes(notes.map(n => n.id !== id ? n : response.data))
+    })
+  }
+
+  useEffect(() => {
+    axios
+      .get('http://localhost:3001/notes')
+      .then(response => {
+        setNotes(response.data)
+      })
+  }, [])
+
   
   const addNote = (event) => {
     event.preventDefault()
     const noteObject = {
       content: newNote,
       important: Math.random() < 0.5,
-      id: notes.length + 1,
     }
   
-    setNotes(notes.concat(noteObject))
-    setNewNote('')
+    axios
+    .post('http://localhost:3001/notes', noteObject)
+    .then(response => {
+      setNotes(notes.concat(response.data))
+      setNewNote('')
+    })
   }
   
   const handleNoteChange = (event) => {
@@ -43,7 +64,7 @@ const App = (props) => {
       </div>
       <ul>
         {notesToShow.map(note => 
-          <Note key={note.id} note={note} />
+          <Note key={note.id} note={note} toggleImportance={() => toggleImportanceOf(note.id)}/>
         )}
       </ul>
       <form onSubmit={addNote}>
