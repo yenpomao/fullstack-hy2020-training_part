@@ -1,7 +1,7 @@
 // import * as http from 'http';
 import http from 'http'
 import express from 'express' 
-
+import cors from 'cors'
 let notes = [
     {
       id: 1,
@@ -27,9 +27,23 @@ const maxId = notes.length > 0
 return maxId + 1
 }
 
+const unknownEndpoint = (request, response) => {
+    response.status(404).send({ error: 'unknown endpoint' })
+  }
+
+const requestLogger = (request, response, next) => {
+console.log('Method:', request.method)
+console.log('Path:  ', request.path)
+console.log('Body:  ', request.body)
+console.log('---')
+next()
+}
+
 
 const app = express()
 app.use(express.json())
+// app.use(unknownEndpoint)
+app.use(cors())
 // const app = http.createServer((request, response) => {
 //     response.writeHead(200, { 'Content-Type': 'application/json' })
 //     response.end(JSON.stringify(notes))
@@ -84,6 +98,6 @@ response.status(204).end()
 })
 
 
-const PORT = 3001
+const PORT = process.env.PORT || 3001
 app.listen(PORT)
 console.log(`Server running on port ${PORT}`)
