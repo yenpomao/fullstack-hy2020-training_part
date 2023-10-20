@@ -44,6 +44,7 @@ const app = express()
 app.use(express.json())
 // app.use(unknownEndpoint)
 app.use(cors())
+app.use(express.static('dist'))
 // const app = http.createServer((request, response) => {
 //     response.writeHead(200, { 'Content-Type': 'application/json' })
 //     response.end(JSON.stringify(notes))
